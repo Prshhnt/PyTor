@@ -336,3 +336,7 @@ except ValueError:
     print_status("Invalid input! Please enter valid numbers.", "error")
 except Exception as e:
     print_status(f"Error: {e}", "error")
+finally:
+    if tor_process and tor_process.poll() is None:
+        tor_process.terminate()
+        print_status("Tor service stopped", "success")
