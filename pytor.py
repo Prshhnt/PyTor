@@ -192,24 +192,18 @@ def change_identity():
                 response = sock.recv(1024)
                 
                 if b'250 OK' in response:
-                    # Show progress bar while waiting
-                    print(f"\n{Fore.CYAN}Requesting new identity...{Style.RESET_ALL}")
-                    for i in range(50):
-                        time.sleep(0.1)
-                        print_progress_bar(i + 1, 50, prefix='Progress:', suffix='Complete')
-                    
+                    print(f"{Fore.CYAN}  ⟳ Requesting new identity...{Style.RESET_ALL}", end='', flush=True)
+                    time.sleep(3)
                     new_ip = get_current_ip()
                     if new_ip:
-                        print_status(f"IP changed to: {Fore.GREEN}{Style.BRIGHT}{new_ip}", "success")
+                        print(f"\r{Fore.GREEN}  ✓ New IP: {Style.BRIGHT}{new_ip}{Style.RESET_ALL}")
                     else:
-                        print_status("IP changed (unable to verify)", "warning")
+                        print(f"\r{Fore.YELLOW}  ⚠ IP changed (verification failed){Style.RESET_ALL}")
                     return
             else:
                 raise Exception("Authentication failed")
     except Exception as control_error:
-        print_status(f"Control port failed: {control_error}", "warning")
-        print_status("Restarting Tor service...", "info")
-        
+        print(f"\r{Fore.YELLOW}  ⚠ Control port failed, restarting Tor...{Style.RESET_ALL}")
         global tor_process
         if tor_process and tor_process.poll() is None:
             tor_process.terminate()
@@ -222,16 +216,12 @@ def change_identity():
             stderr=subprocess.DEVNULL,
             creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
         )
-        
-        for i in range(80):
-            time.sleep(0.1)
-            print_progress_bar(i + 1, 80, prefix='Restarting:', suffix='Complete')
-        
+        time.sleep(8)
         new_ip = get_current_ip()
         if new_ip:
-            print_status(f"IP changed to: {Fore.GREEN}{Style.BRIGHT}{new_ip}", "success")
+            print(f"{Fore.GREEN}  ✓ Tor restarted - New IP: {Style.BRIGHT}{new_ip}{Style.RESET_ALL}")
         else:
-            print_status("IP changed (unable to verify)", "warning")
+            print(f"{Fore.YELLOW}  ⚠ Tor restarted (verification failed){Style.RESET_ALL}")
 
 print_status("Initializing Tor service...", "info")
 
@@ -308,7 +298,16 @@ try:
                 
             except KeyboardInterrupt:
                 print(f"\n\n{Fore.YELLOW}{'═' * 70}{Style.RESET_ALL}")
-                print_status(f"PyTor stopped. Total rotations: {rotation_count}", "success")
+                print_status(f"IP rotation stopped. Total rotations: {rotation_count}", "success")
+                
+                keep_tor = input(f"\n{Fore.CYAN}Keep Tor running in background? (Y/N): {Style.RESET_ALL}").strip().upper()
+                if keep_tor != 'Y':
+                    if tor_process and tor_process.poll() is None:
+                        tor_process.terminate()
+                        print_status("Tor service stopped", "success")
+                else:
+                    print_status("Tor service still running - Use Task Manager to stop if needed", "info")
+                
                 print_status("Thank you for using PyTor!", "info")
                 print(f"{Fore.YELLOW}{'═' * 70}{Style.RESET_ALL}\n")
                 break
@@ -329,6 +328,15 @@ try:
         
         print(f"\n{Fore.GREEN}{Style.BRIGHT}{'═' * 70}{Style.RESET_ALL}")
         print_status(f"All {count} IP rotations completed successfully!", "success")
+        
+        keep_tor = input(f"\n{Fore.CYAN}Keep Tor running in background? (Y/N): {Style.RESET_ALL}").strip().upper()
+        if keep_tor != 'Y':
+            if tor_process and tor_process.poll() is None:
+                tor_process.terminate()
+                print_status("Tor service stopped", "success")
+        else:
+            print_status("Tor service still running - Use Task Manager to stop if needed", "info")
+        
         print_status("Thank you for using PyTor!", "info")
         print(f"{Fore.GREEN}{Style.BRIGHT}{'═' * 70}{Style.RESET_ALL}\n")
         
@@ -336,7 +344,3 @@ except ValueError:
     print_status("Invalid input! Please enter valid numbers.", "error")
 except Exception as e:
     print_status(f"Error: {e}", "error")
-finally:
-    if tor_process and tor_process.poll() is None:
-        tor_process.terminate()
-        print_status("Tor service stopped", "success")
