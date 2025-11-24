@@ -98,15 +98,21 @@ def print_progress_bar(iteration, total, prefix='', suffix='', length=40, fill='
 def create_torrc():
     """Generate Tor configuration file with control port enabled"""
     global tor_data_dir
+    
+    # Use script directory for torrc like the working version
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    torrc_path = os.path.join(script_dir, 'torrc')
+    
+    # Create data directory in user home
     tor_data_dir = os.path.join(os.path.expanduser('~'), '.pytor_data')
     if not os.path.exists(tor_data_dir):
         os.makedirs(tor_data_dir)
     
-    torrc_path = os.path.join(tor_data_dir, 'torrc')
+    # Simple config like the working script
     torrc_content = f'''SocksPort 9050
 ControlPort 9051
+HashedControlPassword ""
 DataDirectory {tor_data_dir.replace(os.sep, '/')}
-CookieAuthentication 0
 '''
     
     with open(torrc_path, 'w') as f:
@@ -168,17 +174,14 @@ def get_current_ip():
     """Fetch current IP address through Tor proxy"""
     url = 'http://checkip.amazonaws.com'
     proxies = {
-        'http': 'socks5://127.0.0.1:9050',
-        'https': 'socks5://127.0.0.1:9050'
+        'http': 'socks5h://127.0.0.1:9050',
+        'https': 'socks5h://127.0.0.1:9050'
     }
-    for attempt in range(3):
-        try:
-            response = requests.get(url, proxies=proxies, timeout=15)
-            return response.text.strip()
-        except:
-            if attempt < 2:
-                time.sleep(2)
-    return None
+    try:
+        response = requests.get(url, proxies=proxies, timeout=30)
+        return response.text.strip()
+    except:
+        return None
 
 def change_identity():
     """Request new Tor identity to change IP address"""
@@ -240,28 +243,30 @@ try:
     print_status(f"Configuration file created", "success")
     
     print_status("Starting Tor daemon...", "info")
+    
+    # Get Tor directory and start from there (needed for GeoIP files)
+    tor_dir = os.path.dirname(tor_path)
+    
+    # Start Tor process - simple and working
     tor_process = subprocess.Popen(
         [tor_path, '-f', torrc_path],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+        cwd=tor_dir,  # Run from Tor directory
         creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
     )
     
-    print(f"\n{Fore.CYAN}Establishing Tor connection...{Style.RESET_ALL}")
-    for i in range(150):
-        time.sleep(0.1)
-        print_progress_bar(i + 1, 150, prefix='Connecting:', suffix='Complete')
+    time.sleep(2)
     
     current_ip = get_current_ip()
     if current_ip:
-        print_status(f"Connected successfully! Your IP: {Fore.GREEN}{Style.BRIGHT}{current_ip}", "success")
+        print_status(f"Connected! Your IP: {Fore.GREEN}{Style.BRIGHT}{current_ip}", "success")
     else:
-        print_status("Tor started but connection verification failed", "warning")
-        print_status("Waiting for bootstrap to complete...", "info")
-        time.sleep(5)
+        print_status("Building circuits, please wait...", "info")
+        time.sleep(3)
         current_ip = get_current_ip()
         if current_ip:
             print_status(f"Connected! Your IP: {Fore.GREEN}{Style.BRIGHT}{current_ip}", "success")
+        else:
+            print_status("Tor started - will retry during rotation", "warning")
         
 except Exception as e:
     print_status(f"Tor initialization failed: {e}", "error")
