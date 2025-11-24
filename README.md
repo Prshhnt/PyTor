@@ -1,4 +1,4 @@
-# PyTor
+# PyTor 🔄
 
 **Automatic IP rotation through the Tor network**
 
@@ -8,7 +8,7 @@
 
 PyTor is a Python-based tool that automates IP address rotation using the Tor network. It provides a clean command-line interface for configuring and managing automatic IP changes at custom intervals.
 
-## Features
+## ✨ Features
 
 - **Automatic Tor Detection** - Locates existing Tor installations or downloads Tor Expert Bundle
 - **Configurable Rotation** - Set custom time intervals between IP changes
@@ -17,13 +17,13 @@ PyTor is a Python-based tool that automates IP address rotation using the Tor ne
 - **Interactive Installer** - Guided setup with optional PATH integration
 - **Clean Interface** - Professional terminal UI with color-coded status messages
 
-## Requirements
+## 📋 Requirements
 
 - Python 3.7 or higher
 - Tor (can be auto-downloaded via installer)
 - Windows (Linux/macOS support planned)
 
-## Installation
+## 🚀 Installation
 
 ### Clone Repository
 
@@ -50,7 +50,7 @@ The installer will:
 pip install -r requirements.txt
 ```
 
-## Usage
+## 💻 Usage
 
 ### Basic Usage
 
@@ -84,7 +84,7 @@ Settings → Network Settings → Manual proxy configuration → SOCKS5: 127.0.0
 **Chrome/Edge:**  
 Install [Proxy SwitchyOmega](https://chrome.google.com/webstore/detail/proxy-switchyomega/padekgcemlokbadohgkifijomclgjgif) extension and configure SOCKS5 proxy
 
-## Technical Details
+## 🔧 Technical Details
 
 ### How It Works
 
@@ -110,7 +110,7 @@ Verify your Tor connection:
 - Visit [check.torproject.org](https://check.torproject.org)
 - Check IP: [icanhazip.com](https://icanhazip.com)
 
-## Troubleshooting
+## ⚠️ Troubleshooting
 
 **Connection Issues:**
 - Ensure ports 9050 and 9051 are available
@@ -125,7 +125,7 @@ Verify your Tor connection:
 - PATH modification requires administrator privileges
 - Run installer as administrator for system-wide installation
 
-## Uninstallation
+## 🗑️ Uninstallation
 
 ```bash
 python install.py
@@ -133,7 +133,7 @@ python install.py
 
 Select the uninstall option and follow the prompts to remove PyTor from your system.
 
-## Development
+## 👨‍💻 Development
 
 ### Project Structure
 
@@ -149,11 +149,11 @@ PyTor/
 
 Contributions are welcome. Please ensure code follows existing style and includes appropriate documentation.
 
-## License
+## 📄 License
 
 This project is open source and available for free use.
 
-## Author
+## 👤 Author
 
 **prshhnt**  
 GitHub: [@Prshhnt](https://github.com/Prshhnt)
