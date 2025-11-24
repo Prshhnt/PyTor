@@ -171,11 +171,14 @@ def get_current_ip():
         'http': 'socks5://127.0.0.1:9050',
         'https': 'socks5://127.0.0.1:9050'
     }
-    try:
-        response = requests.get(url, proxies=proxies, timeout=10)
-        return response.text.strip()
-    except Exception as e:
-        return None
+    for attempt in range(3):
+        try:
+            response = requests.get(url, proxies=proxies, timeout=15)
+            return response.text.strip()
+        except:
+            if attempt < 2:
+                time.sleep(2)
+    return None
 
 def change_identity():
     """Request new Tor identity to change IP address"""
@@ -193,12 +196,12 @@ def change_identity():
                 
                 if b'250 OK' in response:
                     print(f"{Fore.CYAN}  ⟳ Requesting new identity...{Style.RESET_ALL}", end='', flush=True)
-                    time.sleep(3)
+                    time.sleep(5)
                     new_ip = get_current_ip()
                     if new_ip:
-                        print(f"\r{Fore.GREEN}  ✓ New IP: {Style.BRIGHT}{new_ip}{Style.RESET_ALL}")
+                        print(f"\r{Fore.GREEN}  ✓ New IP: {Style.BRIGHT}{new_ip}{Style.RESET_ALL}                    ")
                     else:
-                        print(f"\r{Fore.YELLOW}  ⚠ IP changed (verification failed){Style.RESET_ALL}")
+                        print(f"\r{Fore.YELLOW}  ⚠ IP rotated (Tor proxy busy)                    {Style.RESET_ALL}")
                     return
             else:
                 raise Exception("Authentication failed")
